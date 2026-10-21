@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResumeAI — Smart Resume Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#0a0a0f;--sf:#13131a;--s2:#1c1c28;--bd:#2a2a3a;--ac:#6c63ff;--ac2:#ff6584;--gd:#ffd166;--tx:#e8e8f0;--mu:#7878a0;--ok:#06d6a0;--r:12px;--rl:20px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 10% 10%,rgba(108,99,255,.18) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 85%,rgba(255,101,132,.12) 0%,transparent 60%)}
+nav{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:rgba(10,10,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd)}
+.logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px}
+.logo span{-webkit-text-fill-color:var(--gd)}
+.nav-steps{display:flex;gap:6px}
+.sdot{width:10px;height:10px;border-radius:50%;background:var(--bd);transition:all .3s;cursor:pointer}
+.sdot.active{background:var(--ac);box-shadow:0 0 10px var(--ac)}
+.sdot.done{background:var(--ok)}
+.app{position:relative;z-index:1;max-width:1380px;margin:0 auto;padding:36px 20px}
+.hero{text-align:center;padding:60px 20px 40px;animation:fup .7s ease both}
+.hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.4);border-radius:100px;padding:6px 16px;font-size:.8rem;color:#a09cff;font-weight:500;margin-bottom:24px;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:16px}
+.hero h1 em{font-style:italic;color:var(--gd)}
+.hero p{font-size:1.1rem;color:var(--mu);max-width:520px;margin:0 auto 32px;line-height:1.6}
+.pbar{height:3px;background:var(--bd);border-radius:3px;margin-bottom:32px}
+.pfill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:3px;transition:width .4s ease}
+.stabs{display:flex;gap:4px;margin-bottom:32px;background:var(--sf);border-radius:var(--rl);padding:6px;border:1px solid var(--bd);flex-wrap:wrap}
+.tbtn{flex:1;min-width:80px;padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;background:transparent;color:var(--mu);transition:all .25s}
+.tbtn.active{background:var(--ac);color:#fff;box-shadow:0 4px 15px rgba(108,99,255,.4)}
+.tbtn:hover:not(.active){color:var(--tx);background:var(--s2)}
+.sec{display:none;animation:fup .4s ease both}
+.sec.active{display:block}
+@keyframes fup{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:26px;transition:border-color .2s;margin-bottom:18px}
+.card:hover{border-color:rgba(108,99,255,.28)}
+.ctit{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fgf{grid-column:1/-1}
+label{font-size:.78rem;color:var(--mu);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+input,textarea,select{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:11px 13px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+input:focus,textarea:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(108,99,255,.14)}
+textarea{resize:vertical;min-height:85px}
+select option{background:var(--s2)}
+.ptop{display:flex;gap:26px;align-items:flex-start}
+.psec{display:flex;flex-direction:column;align-items:center;gap:9px;flex-shrink:0}
+.pzone{width:128px;height:128px;border-radius:50%;border:2px dashed var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;background:var(--s2)}
+.pzone:hover{border-color:var(--ac);background:rgba(108,99,255,.08)}
+.pzone .pico{font-size:1.8rem;z-index:1;pointer-events:none}
+.pzone .ptxt{font-size:.68rem;color:var(--mu);text-align:center;line-height:1.4;z-index:1;margin-top:4px;pointer-events:none}
+#pprev{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:50%;display:none}
+.pov{position:absolute;inset:0;border-radius:50%;background:rgba(108,99,255,.65);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#fff;font-weight:700;opacity:0;transition:opacity .2s;z-index:2;pointer-events:none}
+.pzone:hover .pov{opacity:1}
+#pinp{display:none}
+.pinf{font-size:.7rem;color:var(--mu);text-align:center;line-height:1.5;max-width:118px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;border:none;cursor:pointer;transition:all .25s;white-space:nowrap}
+.bp{background:linear-gradient(135deg,var(--ac),#8b83ff);color:#fff;box-shadow:0 4px 18px rgba(108,99,255,.35)}
+.bp:hover{transform:translateY(-2px);box-shadow:0 7px 28px rgba(108,99,255,.5)}
+.bgd{background:linear-gradient(135deg,var(--gd),#ffb347);color:#1a1000;box-shadow:0 4px 18px rgba(255,209,102,.3)}
+.bgd:hover{transform:translateY(-2px);box-shadow:0 7px 28px rgba(255,209,102,.5)}
+.bred{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;box-shadow:0 4px 18px rgba(230,57,70,.3)}
+.bred:hover{transform:translateY(-2px);box-shadow:0 7px 28px rgba(230,57,70,.5)}
+.bgrn{background:linear-gradient(135deg,#06d6a0,#048a64);color:#fff;box-shadow:0 4px 18px rgba(6,214,160,.3)}
+.bgrn:hover{transform:translateY(-2px);box-shadow:0 7px 28px rgba(6,214,160,.5)}
+.bpur{background:linear-gradient(135deg,#7b2ff7,#a855f7);color:#fff;box-shadow:0 4px 18px rgba(123,47,247,.3)}
+.bpur:hover{transform:translateY(-2px);box-shadow:0 7px 28px rgba(168,85,247,.5)}
+.bol{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.bol:hover{border-color:var(--ac);color:var(--ac)}
+.bdng{background:rgba(255,101,132,.12);color:var(--ac2);border:1px solid rgba(255,101,132,.28)}
+.bdng:hover{background:rgba(255,101,132,.22)}
+.bsm{padding:6px 13px;font-size:.8rem}
+.bai{background:linear-gradient(135deg,#1c1c40,#2a1040);color:#b09fff;border:1px solid rgba(108,99,255,.4);position:relative;overflow:hidden}
+.bai::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(108,99,255,.15),transparent);transform:translateX(-100%);transition:transform .5s}
+.bai:hover::before{transform:translateX(100%)}
+.bai:hover{border-color:var(--ac);color:#d0c0ff}
+.aib{background:linear-gradient(135deg,rgba(108,99,255,.08),rgba(255,101,132,.05));border:1px solid rgba(108,99,255,.26);border-radius:var(--rl);padding:20px;margin-bottom:18px}
+.aibt{font-size:.83rem;color:#a09cff;font-weight:600;margin-bottom:11px}
+.aio{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px;font-size:.86rem;line-height:1.7;color:var(--tx);min-height:76px;white-space:pre-wrap;font-family:'DM Mono',monospace;display:none;margin-top:11px}
+.aio.on{display:block}
+.ldr{display:none;align-items:center;gap:9px;color:var(--mu);font-size:.86rem}
+.ldr.on{display:flex}
+.sp{width:17px;height:17px;border-radius:50%;border:2px solid var(--bd);border-top-color:var(--ac);animation:spn .7s linear infinite}
+@keyframes spn{to{transform:rotate(360deg)}}
+.ent{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:11px;transition:border-color .2s}
+.ent:hover{border-color:rgba(108,99,255,.24)}
+.enthd{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.enum{font-size:.72rem;color:var(--mu);font-family:'DM Mono',monospace;letter-spacing:.5px}
+.skwrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.sktag{display:flex;align-items:center;gap:6px;background:rgba(108,99,255,.13);border:1px solid rgba(108,99,255,.27);color:#a09cff;border-radius:100px;padding:4px 11px;font-size:.81rem;animation:pop .22s ease}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+.sktag button{background:none;border:none;cursor:pointer;color:#a09cff;font-size:.88rem;padding:0}
+.sktag button:hover{color:var(--ac2)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.tcard{border:2px solid var(--bd);border-radius:var(--r);padding:12px;cursor:pointer;transition:all .25s;text-align:center;background:var(--s2)}
+.tcard:hover{border-color:var(--ac);transform:translateY(-3px);box-shadow:0 8px 24px rgba(108,99,255,.2)}
+.tcard.sel{border-color:var(--ac);background:rgba(108,99,255,.12);box-shadow:0 0 0 3px rgba(108,99,255,.2)}
+.tprev{width:100%;aspect-ratio:.707/1;border-radius:5px;margin-bottom:8px;overflow:hidden;display:flex;flex-direction:column;gap:3px;padding:6px;position:relative}
+.tl{height:4px;border-radius:2px;opacity:.45}
+.tl.h{height:7px;width:55%;opacity:.75}
+.tl.s{height:2px;width:75%;opacity:.25}
+.tname{font-size:.75rem;font-weight:600}
+.pvlyt{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+@media(max-width:940px){.pvlyt{grid-template-columns:1fr}}
+.rwrap{background:#bbb;padding:8px;border-radius:var(--r)}
+.rbox{background:#fff;border-radius:2px;box-shadow:0 4px 18px rgba(0,0,0,.3);overflow:hidden}
+.expgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.expinfo{padding:13px;background:rgba(108,99,255,.06);border:1px solid rgba(108,99,255,.17);border-radius:var(--r)}
+.pdfo{position:fixed;inset:0;z-index:9999;background:rgba(10,10,15,.96);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.pdfo.on{display:flex}
+.pdfico{font-size:3rem;animation:bou .8s ease infinite alternate}
+@keyframes bou{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+.pdfot{font-family:'Playfair Display',serif;font-size:1.3rem}
+.pdfos{color:var(--mu);font-size:.85rem}
+.pdfpb{width:270px;height:5px;background:var(--bd);border-radius:5px;overflow:hidden}
+.pdfpf{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));width:0%;transition:width .1s;border-radius:5px}
+.toast{position:fixed;bottom:26px;right:26px;z-index:9998;background:var(--sf);border:1px solid var(--ok);color:var(--ok);border-radius:var(--r);padding:11px 18px;font-size:.87rem;font-weight:500;transform:translateY(100px);transition:transform .32s ease;box-shadow:0 10px 36px rgba(0,0,0,.4)}
+.toast.on{transform:none}
+.row{display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.navrow{display:flex;justify-content:space-between;align-items:center;margin-top:26px}
+.badge{background:rgba(6,214,160,.14);color:var(--ok);border:1px solid rgba(6,214,160,.28);border-radius:100px;padding:3px 10px;font-size:.76rem;font-weight:500}
+.tip{font-size:.78rem;color:var(--mu);margin-top:5px;line-height:1.5}
+@media(max-width:700px){nav{padding:13px 18px}.fg2,.fg3{grid-template-columns:1fr}.fgf{grid-column:1}.tgrid{grid-template-columns:repeat(3,1fr)}.ptop{flex-direction:column;align-items:center}.expgrid{grid-template-columns:1fr}}
+@media(max-width:480px){.tbtn{font-size:.7rem;padding:7px 7px;min-width:52px}.tgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* ═══════════════════════════════════════════════
+   RESUME TEMPLATE CSS — used in preview AND export
+   Each template has a unique 2-letter class prefix
+═══════════════════════════════════════════════ */
+/* shared helpers inside all templates */
+.ri{margin-bottom:7px}
+.rit{font-weight:bold;font-size:.88em}
+.ris{font-size:.78em;color:#666;margin-bottom:2px}
+.rid{font-size:.8em;color:#444;line-height:1.55}
+.rsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+
+/* ── T1: Classic Purple ── */
+.T1{font-family:Georgia,'Times New Roman',serif;padding:26px 30px;font-size:10px;color:#111;background:#fff}
+.T1 .rh{display:flex;gap:16px;align-items:flex-start;margin-bottom:9px}
+.T1 .rph{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2.5px solid #6c63ff;flex-shrink:0;display:block}
+.T1 .rht{flex:1}
+.T1 .rn{font-size:2em;font-weight:bold;color:#1a1a2e;line-height:1.1}
+.T1 .rr{font-size:.95em;color:#6c63ff;font-weight:600;margin:3px 0 4px}
+.T1 .rco{font-size:.8em;color:#555;display:flex;gap:9px;flex-wrap:wrap}
+.T1 hr{border:none;border-top:2px solid #6c63ff;margin:7px 0 11px}
+.T1 .rs{margin-bottom:11px}
+.T1 .rsh{font-size:.88em;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#6c63ff;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:7px}
+.T1 .rskp{background:#f0eeff;color:#6c63ff;border-radius:3px;padding:2px 8px;font-size:.78em}
+
+/* ── T2: Modern Dark Sidebar ── */
+.T2{font-family:Arial,Helvetica,sans-serif;display:flex;font-size:10px;color:#111;background:#fff;min-height:400px}
+.T2 .rsb{background:#1a1a2e;color:#fff;padding:22px 15px;width:37%;flex-shrink:0}
+.T2 .rph{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #6c63ff;display:block;margin:0 auto 11px}
+.T2 .rn{font-size:1.28em;font-weight:bold;color:#fff;text-align:center;line-height:1.2}
+.T2 .rr{font-size:.77em;color:#a09cff;text-align:center;margin:3px 0 13px}
+.T2 .rsl{font-size:.66em;text-transform:uppercase;letter-spacing:1px;color:#7c70ff;font-weight:bold;margin:9px 0 4px;border-bottom:1px solid #2a2a4e;padding-bottom:3px}
+.T2 .rci{font-size:.73em;color:#bbb;margin-bottom:3px;word-break:break-all}
+.T2 .rbw{margin-bottom:5px}
+.T2 .rbl{font-size:.73em;color:#ccc;margin-bottom:2px}
+.T2 .rb{height:4px;background:#2e2e50;border-radius:2px}
+.T2 .rbf{height:100%;background:linear-gradient(90deg,#6c63ff,#a09cff);border-radius:2px}
+.T2 .rmn{padding:22px 17px;flex:1}
+.T2 .rsh{font-size:.82em;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#1a1a2e;border-left:3px solid #6c63ff;padding-left:8px;margin:13px 0 7px}
+.T2 .rsu{font-size:.79em;color:#444;line-height:1.55;margin-bottom:9px}
+.T2 .rit{font-weight:bold;font-size:.84em;color:#1a1a2e}
+.T2 .ris{font-size:.74em;color:#888;margin-bottom:2px}
+.T2 .rid{font-size:.76em;color:#444;line-height:1.5}
+
+/* ── T3: Minimal Clean ── */
+.T3{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;padding:30px 34px;font-size:10px;color:#111;background:#fff}
+.T3 .rh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px;gap:14px}
+.T3 .rhl{flex:1}
+.T3 .rph{width:66px;height:66px;border-radius:6px;object-fit:cover;flex-shrink:0}
+.T3 .rn{font-size:2.1em;font-weight:300;letter-spacing:-1px;color:#111;line-height:1.1}
+.T3 .rr{font-size:.85em;color:#888;margin-top:2px}
+.T3 .rco{font-size:.74em;color:#aaa;margin-top:3px}
+.T3 .rdv{height:1px;background:#eee;margin:9px 0 7px}
+.T3 .rsh{font-size:.63em;text-transform:uppercase;letter-spacing:3px;color:#aaa;margin:13px 0 4px}
+.T3 .rir{display:flex;justify-content:space-between;gap:7px}
+.T3 .rit{font-weight:600;font-size:.84em}
+.T3 .rdt{font-size:.73em;color:#aaa;white-space:nowrap}
+.T3 .ris{font-size:.75em;color:#888;margin-bottom:2px}
+.T3 .rid{font-size:.78em;color:#555;line-height:1.6}
+.T3 .rskp{font-size:.74em;color:#555;border:1px solid #ddd;border-radius:3px;padding:2px 7px}
+
+/* ── T4: Executive Gold ── */
+.T4{font-family:Georgia,serif;font-size:10px;color:#1a1000;background:#fff}
+.T4 .rtop{background:#2c2416;padding:22px 30px;color:#fff;display:flex;align-items:center;gap:18px}
+.T4 .rph{width:78px;height:78px;border-radius:4px;object-fit:cover;border:2px solid #d4a017;flex-shrink:0;display:block}
+.T4 .rhr{flex:1}
+.T4 .rn{font-size:1.95em;font-weight:bold;color:#fff;line-height:1.1}
+.T4 .rr{font-size:.95em;color:#d4a017;font-weight:600;margin:4px 0}
+.T4 .rco{font-size:.77em;color:#ccc;display:flex;gap:11px;flex-wrap:wrap}
+.T4 .rb{padding:18px 30px}
+.T4 .rsh{font-size:.82em;font-weight:bold;text-transform:uppercase;letter-spacing:2px;color:#2c2416;border-bottom:2px solid #d4a017;padding-bottom:3px;margin:11px 0 7px}
+.T4 .rskp{background:#2c2416;color:#d4a017;border-radius:3px;padding:2px 8px;font-size:.77em}
+
+/* ── T5: Teal Sidebar ── */
+.T5{font-family:Arial,sans-serif;display:flex;font-size:10px;background:#fff}
+.T5 .rsb{background:#006d77;padding:22px 15px;width:36%;flex-shrink:0;color:#fff}
+.T5 .rph{width:78px;height:78px;border-radius:50%;object-fit:cover;border:3px solid #83c5be;display:block;margin:0 auto 11px}
+.T5 .rn{font-size:1.25em;font-weight:bold;text-align:center;line-height:1.2;color:#fff}
+.T5 .rr{font-size:.77em;color:#83c5be;text-align:center;margin:3px 0 13px}
+.T5 .rsl{font-size:.66em;text-transform:uppercase;letter-spacing:1px;color:#83c5be;font-weight:bold;margin:9px 0 4px;border-bottom:1px solid rgba(131,197,190,.3);padding-bottom:3px}
+.T5 .rci{font-size:.73em;color:#e0f7fa;margin-bottom:3px;word-break:break-all}
+.T5 .rbw{margin-bottom:5px}
+.T5 .rbl{font-size:.73em;color:#e0f7fa;margin-bottom:2px}
+.T5 .rb{height:4px;background:rgba(255,255,255,.2);border-radius:2px}
+.T5 .rbf{height:100%;background:#83c5be;border-radius:2px}
+.T5 .rmn{padding:22px 17px;flex:1}
+.T5 .rsh{font-size:.82em;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#006d77;border-left:3px solid #83c5be;padding-left:8px;margin:13px 0 7px}
+.T5 .rsu{font-size:.79em;color:#444;line-height:1.55;margin-bottom:9px}
+.T5 .rit{font-weight:bold;font-size:.84em;color:#006d77}
+.T5 .ris{font-size:.74em;color:#888;margin-bottom:2px}
+.T5 .rid{font-size:.76em;color:#444;line-height:1.5}
+.T5 .rskp{background:#e0f2f1;color:#006d77;border-radius:3px;padding:2px 8px;font-size:.78em}
+
+/* ── T6: Forest Green Sidebar ── */
+.T6{font-family:Arial,sans-serif;display:flex;font-size:10px;background:#fff}
+.T6 .rsb{background:#1b4332;padding:22px 15px;width:36%;flex-shrink:0;color:#fff}
+.T6 .rph{width:78px;height:78px;border-radius:50%;object-fit:cover;border:3px solid #52b788;display:block;margin:0 auto 11px}
+.T6 .rn{font-size:1.25em;font-weight:bold;text-align:center;line-height:1.2;color:#fff}
+.T6 .rr{font-size:.77em;color:#95d5b2;text-align:center;margin:3px 0 13px}
+.T6 .rsl{font-size:.66em;text-transform:uppercase;letter-spacing:1px;color:#95d5b2;font-weight:bold;margin:9px 0 4px;border-bottom:1px solid rgba(149,213,178,.3);padding-bottom:3px}
+.T6 .rci{font-size:.73em;color:#d8f3dc;margin-bottom:3px;word-break:break-all}
+.T6 .rbw{margin-bottom:5px}
+.T6 .rbl{font-size:.73em;color:#d8f3dc;margin-bottom:2px}
+.T6 .rb{height:4px;background:rgba(255,255,255,.15);border-radius:2px}
+.T6 .rbf{height:100%;background:#52b788;border-radius:2px}
+.T6 .rmn{padding:22px 17px;flex:1}
+.T6 .rsh{font-size:.82em;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#1b4332;border-left:3px solid #52b788;padding-left:8px;margin:13px 0 7px}
+.T6 .rsu{font-size:.79em;color:#444;line-height:1.55;margin-bottom:9px}
+.T6 .rit{font-weight:bold;font-size:.84em;color:#1b4332}
+.T6 .ris{font-size:.74em;color:#888;margin-bottom:2px}
+.T6 .rid{font-size:.76em;color:#444;line-height:1.5}
+.T6 .rskp{background:#d8f3dc;color:#1b4332;border-radius:3px;padding:2px 8px;font-size:.78em}
+
+/* ── T7: Purple Creative Banner ── */
+.T7{font-family:Arial,sans-serif;font-size:10px;background:#fff;color:#111}
+.T7 .rtop{background:linear-gradient(135deg,#4a0e8f,#7b2d8b);padding:22px 28px;display:flex;align-items:center;gap:16px}
+.T7 .rph{width:76px;height:76px;border-radius:12px;object-fit:cover;border:3px solid #d4a5f5;flex-shrink:0;display:block}
+.T7 .rhr{flex:1}
+.T7 .rn{font-size:1.9em;font-weight:bold;color:#fff;line-height:1.1}
+.T7 .rr{font-size:.93em;color:#d4a5f5;margin:3px 0}
+.T7 .rco{font-size:.77em;color:#edd9ff;display:flex;gap:10px;flex-wrap:wrap}
+.T7 .rb{padding:16px 28px}
+.T7 .rsh{font-size:.85em;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#7b2d8b;border-bottom:2px solid #d4a5f5;padding-bottom:3px;margin:11px 0 7px}
+.T7 .rit{font-weight:bold;font-size:.87em;color:#4a0e8f}
+.T7 .rskp{background:#f3e8ff;color:#7b2d8b;border-radius:3px;padding:2px 8px;font-size:.78em;border:1px solid #d4a5f5}
+
+/* ── T8: Corporate Navy ── */
+.T8{font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;background:#fff;color:#111;padding:28px 32px}
+.T8 .rh{display:flex;gap:16px;align-items:flex-start;margin-bottom:12px}
+.T8 .rph{width:72px;height:72px;border-radius:4px;object-fit:cover;border:2px solid #1a3a6b;flex-shrink:0;display:block}
+.T8 .rht{flex:1}
+.T8 .rn{font-size:2em;font-weight:bold;color:#1a3a6b;line-height:1.1}
+.T8 .rr{font-size:.95em;color:#c9a84c;font-weight:600;margin:3px 0 4px}
+.T8 .rco{font-size:.8em;color:#444;display:flex;gap:9px;flex-wrap:wrap}
+.T8 hr{border:none;border-top:3px solid #1a3a6b;margin:8px 0 12px}
+.T8 .rs{margin-bottom:11px}
+.T8 .rsh{font-size:.88em;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#fff;background:#1a3a6b;padding:4px 10px;margin-bottom:8px;border-radius:3px;display:block}
+.T8 .rskp{background:#1a3a6b;color:#c9a84c;border-radius:3px;padding:2px 8px;font-size:.78em}
+
+/* ── T9: Sunset Orange Banner ── */
+.T9{font-family:Georgia,serif;font-size:10px;background:#fff;color:#111}
+.T9 .rtop{background:linear-gradient(135deg,#f77f00,#d62828);padding:22px 28px;display:flex;align-items:center;gap:16px}
+.T9 .rph{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid #fcbf49;flex-shrink:0;display:block}
+.T9 .rhr{flex:1}
+.T9 .rn{font-size:1.9em;font-weight:bold;color:#fff;line-height:1.1}
+.T9 .rr{font-size:.93em;color:#fcbf49;margin:3px 0}
+.T9 .rco{font-size:.77em;color:#ffe8cc;display:flex;gap:10px;flex-wrap:wrap}
+.T9 .rb{padding:16px 28px}
+.T9 .rsh{font-size:.85em;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#d62828;border-bottom:2px solid #fcbf49;padding-bottom:3px;margin:11px 0 7px}
+.T9 .rit{font-weight:bold;font-size:.87em;color:#d62828}
+.T9 .rskp{background:#fff3e0;color:#d62828;border-radius:3px;padding:2px 8px;font-size:.78em;border:1px solid #fcbf49}
+
+/* ── T10: Slate Blue Modern ── */
+.T10{font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;background:#f8f9fa;color:#111}
+.T10 .rtop{background:#2d3748;padding:22px 28px;display:flex;align-items:center;gap:16px}
+.T10 .rph{width:76px;height:76px;border-radius:8px;object-fit:cover;border:3px solid #63b3ed;flex-shrink:0;display:block}
+.T10 .rhr{flex:1}
+.T10 .rn{font-size:1.9em;font-weight:bold;color:#fff;line-height:1.1}
+.T10 .rr{font-size:.93em;color:#63b3ed;margin:3px 0}
+.T10 .rco{font-size:.77em;color:#a0aec0;display:flex;gap:10px;flex-wrap:wrap}
+.T10 .rb{padding:16px 28px;background:#f8f9fa}
+.T10 .rsh{font-size:.85em;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#2d3748;border-bottom:2px solid #63b3ed;padding-bottom:3px;margin:11px 0 7px}
+.T10 .ri{margin-bottom:7px;background:#fff;border-radius:5px;padding:8px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.T10 .rit{font-weight:bold;font-size:.87em;color:#2d3748}
+.T10 .rskp{background:#ebf8ff;color:#2b6cb0;border-radius:3px;padding:2px 8px;font-size:.78em;border:1px solid #bee3f8}
+
+/* ── T11: Rose Pink Elegant ── */
+.T11{font-family:Georgia,serif;font-size:10px;background:#fff;color:#111}
+.T11 .rtop{background:linear-gradient(135deg,#c2185b,#e91e8c);padding:22px 28px;display:flex;align-items:center;gap:16px}
+.T11 .rph{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid #f8bbd0;flex-shrink:0;display:block}
+.T11 .rhr{flex:1}
+.T11 .rn{font-size:1.9em;font-weight:bold;color:#fff;line-height:1.1}
+.T11 .rr{font-size:.93em;color:#f8bbd0;margin:3px 0}
+.T11 .rco{font-size:.77em;color:#fce4ec;display:flex;gap:10px;flex-wrap:wrap}
+.T11 .rb{padding:16px 28px}
+.T11 .rsh{font-size:.85em;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#c2185b;border-bottom:2px solid #f8bbd0;padding-bottom:3px;margin:11px 0 7px}
+.T11 .rit{font-weight:bold;font-size:.87em;color:#880e4f}
+.T11 .rskp{background:#fce4ec;color:#c2185b;border-radius:3px;padding:2px 8px;font-size:.78em;border:1px solid #f8bbd0}
+
+/* ── T12: Indigo Two-Column ── */
+.T12{font-family:Arial,sans-serif;display:flex;font-size:10px;background:#fff}
+.T12 .rsb{background:#3730a3;padding:22px 15px;width:36%;flex-shrink:0;color:#fff}
+.T12 .rph{width:78px;height:78px;border-radius:50%;object-fit:cover;border:3px solid #818cf8;display:block;margin:0 auto 11px}
+.T12 .rn{font-size:1.25em;font-weight:bold;text-align:center;line-height:1.2;color:#fff}
+.T12 .rr{font-size:.77em;color:#a5b4fc;text-align:center;margin:3px 0 13px}
+.T12 .rsl{font-size:.66em;text-transform:uppercase;letter-spacing:1px;color:#a5b4fc;font-weight:bold;margin:9px 0 4px;border-bottom:1px solid rgba(165,180,252,.3);padding-bottom:3px}
+.T12 .rci{font-size:.73em;color:#c7d2fe;margin-bottom:3px;word-break:break-all}
+.T12 .rbw{margin-bottom:5px}
+.T12 .rbl{font-size:.73em;color:#c7d2fe;margin-bottom:2px}
+.T12 .rb{height:4px;background:rgba(255,255,255,.15);border-radius:2px}
+.T12 .rbf{height:100%;background:#818cf8;border-radius:2px}
+.T12 .rmn{padding:22px 17px;flex:1}
+.T12 .rsh{font-size:.82em;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#3730a3;border-left:3px solid #818cf8;padding-left:8px;margin:13px 0 7px}
+.T12 .rsu{font-size:.79em;color:#444;line-height:1.55;margin-bottom:9px}
+.T12 .rit{font-weight:bold;font-size:.84em;color:#3730a3}
+.T12 .ris{font-size:.74em;color:#888;margin-bottom:2px}
+.T12 .rid{font-size:.76em;color:#444;line-height:1.5}
+.T12 .rskp{background:#eef2ff;color:#3730a3;border-radius:3px;padding:2px 8px;font-size:.78em}
+
+/* ── T13: Amber Professional ── */
+.T13{font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;background:#fff;color:#111;padding:26px 30px}
+.T13 .rh{display:flex;gap:16px;align-items:flex-start;margin-bottom:10px}
+.T13 .rph{width:70px;height:70px;border-radius:6px;object-fit:cover;border:3px solid #f59e0b;flex-shrink:0;display:block}
+.T13 .rht{flex:1}
+.T13 .rn{font-size:2em;font-weight:bold;color:#78350f;line-height:1.1}
+.T13 .rr{font-size:.95em;color:#f59e0b;font-weight:600;margin:3px 0 4px}
+.T13 .rco{font-size:.8em;color:#555;display:flex;gap:9px;flex-wrap:wrap}
+.T13 hr{border:none;border-top:3px solid #f59e0b;margin:8px 0 12px}
+.T13 .rs{margin-bottom:11px}
+.T13 .rsh{font-size:.88em;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#78350f;background:#fef3c7;padding:4px 10px;margin-bottom:8px;border-radius:3px;border-left:3px solid #f59e0b}
+.T13 .rit{font-weight:bold;font-size:.88em;color:#78350f}
+.T13 .rskp{background:#fef3c7;color:#78350f;border-radius:3px;padding:2px 8px;font-size:.78em;border:1px solid #f59e0b}
+
+/* ── T14: Monochrome Stark ── */
+.T14{font-family:'Courier New',Courier,monospace;font-size:10px;background:#fff;color:#000;padding:28px 32px}
+.T14 .rh{display:flex;gap:16px;align-items:flex-start;margin-bottom:12px}
+.T14 .rph{width:70px;height:70px;border-radius:0;object-fit:cover;border:2px solid #000;flex-shrink:0;display:block}
+.T14 .rht{flex:1}
+.T14 .rn{font-size:1.9em;font-weight:bold;color:#000;line-height:1.1;text-transform:uppercase;letter-spacing:2px}
+.T14 .rr{font-size:.9em;color:#333;margin:3px 0 4px;letter-spacing:1px}
+.T14 .rco{font-size:.78em;color:#555;display:flex;gap:9px;flex-wrap:wrap}
+.T14 hr{border:none;border-top:2px solid #000;margin:8px 0 12px}
+.T14 .rs{margin-bottom:11px}
+.T14 .rsh{font-size:.88em;font-weight:bold;text-transform:uppercase;letter-spacing:2px;color:#000;margin-bottom:6px;padding-bottom:2px;border-bottom:1px solid #000}
+.T14 .rit{font-weight:bold;font-size:.88em}
+.T14 .rskp{background:#000;color:#fff;border-radius:0;padding:2px 8px;font-size:.78em}
+</style>
+</head>
+<body>
+
+<nav><div class="logo">Resume<span>AI</span></div><div class="nav-steps" id="navDots"></div></nav>
+<div class="toast" id="toast"></div>
+
+<!-- PDF overlay -->
+<div class="pdfo" id="pdfo">
+  <div class="pdfico" id="pdfico">📄</div>
+  <div class="pdfot" id="pdfot">Generating…</div>
+  <div class="pdfpb"><div class="pdfpf" id="pdfpf"></div></div>
+  <div class="pdfos" id="pdfos">Please wait</div>
+</div>
+
+<!-- OFF-SCREEN RENDER — must be visible (not display:none/visibility:hidden) for html2canvas to work.
+     We position it far off screen instead. -->
+<div id="RENDER" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;z-index:-1;"></div>
+
+<div class="app">
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hbadge">✦ Powered by Claude AI</div>
+  <h1>Build a Resume that<br><em>Gets You Hired</em></h1>
+  <p>Fill your details — AI writes bullet points, summaries & cover letters. Download as PDF, JPG or PNG.</p>
+  <button class="btn bp" onclick="boot()" style="font-size:1rem;padding:14px 36px">🚀 Start Building Free</button>
+</div>
+
+<div class="pbar" id="pbar" style="display:none"><div class="pfill" id="pfill" style="width:0%"></div></div>
+<div class="stabs" id="stabs" style="display:none"></div>
+
+<!-- ══ STEP 1: Personal ══ -->
+<div class="sec" id="sec-0">
+  <div class="card">
+    <div class="ctit">👤 Personal Information</div>
+    <div class="ptop">
+      <div class="psec">
+        <label>Profile Photo</label>
+        <div class="pzone" onclick="document.getElementById('pinp').click()">
+          <span class="pico">📷</span><span class="ptxt">Click to<br>upload</span>
+          <img id="pprev" src="" alt="Photo">
+          <div class="pov" id="pov">✎ Change</div>
+        </div>
+        <input type="file" id="pinp" accept="image/png,image/jpeg,image/webp" onchange="handlePhoto(event)">
+        <div class="pinf">PNG/JPG · Max 5MB<br>Square crop best</div>
+        <button class="btn bdng bsm" id="rmbtn" style="display:none;width:108px" onclick="removePhoto()">× Remove</button>
+      </div>
+      <div class="fg2" style="flex:1">
+        <div class="fg"><label>Full Name *</label><input id="f-name" placeholder="Muhammad Ali"></div>
+        <div class="fg"><label>Job Title / Role *</label><input id="f-title" placeholder="Frontend Developer"></div>
+        <div class="fg"><label>Email *</label><input id="f-email" type="email" placeholder="ali@email.com"></div>
+        <div class="fg"><label>Phone</label><input id="f-phone" placeholder="+92 300 0000000"></div>
+        <div class="fg"><label>City, Country</label><input id="f-location" placeholder="Gujrat, Pakistan"></div>
+        <div class="fg"><label>LinkedIn</label><input id="f-linkedin" placeholder="linkedin.com/in/username"></div>
+        <div class="fg"><label>GitHub / Portfolio</label><input id="f-github" placeholder="github.com/username"></div>
+        <div class="fg"><label>Website</label><input id="f-website" placeholder="yoursite.com"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit">🤖 AI Professional Summary</div>
+    <div class="aib">
+      <div class="aibt">✦ Let AI write your summary</div>
+      <div class="fg2">
+        <div class="fg"><label>Years of Experience</label><input id="ai-yrs" type="number" min="0" placeholder="3"></div>
+        <div class="fg"><label>Top Skills (comma separated)</label><input id="ai-skh" placeholder="React, Node.js, Python"></div>
+        <div class="fg fgf"><label>Tone</label>
+          <select id="ai-tone"><option value="professional">Professional</option><option value="creative">Creative &amp; Bold</option><option value="technical">Highly Technical</option><option value="leadership">Leadership-focused</option></select>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn bai" onclick="genSum()">✦ Generate with AI</button>
+        <div class="ldr" id="ld-sum"><div class="sp"></div> Writing…</div>
+      </div>
+      <div class="aio" id="out-sum"></div>
+    </div>
+    <div class="fg">
+      <label>Professional Summary *</label>
+      <textarea id="f-summary" rows="5" placeholder="AI auto-fills here — or write your own…"></textarea>
+      <p class="tip">AI result is pasted here automatically. Edit freely.</p>
+    </div>
+  </div>
+  <div class="navrow"><div></div><button class="btn bp" onclick="goTo(1)">Next: Experience →</button></div>
+</div>
+
+<!-- ══ STEP 2: Experience ══ -->
+<div class="sec" id="sec-1">
+  <div class="card">
+    <div class="ctit">💼 Work Experience</div>
+    <div id="exp-list"></div>
+    <button class="btn bol" onclick="addExp()">+ Add Position</button>
+  </div>
+  <div class="card">
+    <div class="ctit">🤖 AI Bullet Point Generator</div>
+    <div class="aib">
+      <div class="aibt">✦ Generate impressive bullet points for any role</div>
+      <div class="fg2">
+        <div class="fg"><label>Job Title</label><input id="ai-bpt" placeholder="Frontend Developer"></div>
+        <div class="fg"><label>Company</label><input id="ai-bpc" placeholder="Google"></div>
+        <div class="fg fgf"><label>Key Responsibilities (brief)</label><textarea id="ai-bpr" rows="2" placeholder="Built web apps, led team of 4, improved load performance…"></textarea></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn bai" onclick="genBullets()">✦ Generate Bullets</button>
+        <div class="ldr" id="ld-bul"><div class="sp"></div> Generating…</div>
+      </div>
+      <div class="aio" id="out-bul"></div>
+    </div>
+  </div>
+  <div class="navrow"><button class="btn bol" onclick="goTo(0)">← Back</button><button class="btn bp" onclick="goTo(2)">Next: Education →</button></div>
+</div>
+
+<!-- ══ STEP 3: Education ══ -->
+<div class="sec" id="sec-2">
+  <div class="card">
+    <div class="ctit">🎓 University / College Education</div>
+    <div id="edu-list"></div>
+    <button class="btn bol" onclick="addEdu()">+ Add University / College</button>
+  </div>
+  <div class="card">
+    <div class="ctit">🏫 School Qualification</div>
+    <p class="tip" style="margin-bottom:14px">Add your Matric (Grade 10), FSc / FA (Grade 12), O-Levels, A-Levels or any secondary school qualification here.</p>
+    <div id="sch-list"></div>
+    <button class="btn bol" onclick="addSch()">+ Add School Qualification</button>
+  </div>
+  <div class="navrow"><button class="btn bol" onclick="goTo(1)">← Back</button><button class="btn bp" onclick="goTo(3)">Next: Skills →</button></div>
+</div>
+
+<!-- ══ STEP 4: Skills ══ -->
+<div class="sec" id="sec-3">
+  <div class="card">
+    <div class="ctit">⚡ Skills</div>
+    <div class="aib">
+      <div class="aibt">✦ AI Skill Suggestions — click any to add instantly</div>
+      <div class="row">
+        <input id="ai-skr" placeholder="Your role (e.g. Web Developer)" style="max-width:260px">
+        <button class="btn bai bsm" onclick="suggestSkills()">✦ Suggest Skills</button>
+        <div class="ldr" id="ld-sk"><div class="sp"></div></div>
+      </div>
+      <div id="sugg-sk" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="fg" style="margin-top:15px">
+      <label>Add Skill Manually</label>
+      <div class="row">
+        <input id="sk-inp" placeholder="Type a skill then press Enter" style="flex:1" onkeydown="if(event.key==='Enter')addSkill()">
+        <button class="btn bol bsm" onclick="addSkill()">+ Add</button>
+      </div>
+    </div>
+    <div class="skwrap" id="sk-list"></div>
+  </div>
+  <div class="card">
+    <div class="ctit">📜 Certifications <span style="font-size:.74rem;color:var(--mu);font-weight:400">(optional)</span></div>
+    <textarea id="f-certs" placeholder="AWS Certified Developer — Amazon, 2024&#10;Google IT Support — Coursera, 2023" rows="4" style="width:100%"></textarea>
+  </div>
+  <div class="navrow"><button class="btn bol" onclick="goTo(2)">← Back</button><button class="btn bp" onclick="goTo(4)">Next: Template →</button></div>
+</div>
+
+<!-- ══ STEP 5: Template ══ -->
+<div class="sec" id="sec-4">
+  <div class="card">
+    <div class="ctit">🎨 Choose a Template <span style="font-size:.8rem;color:var(--mu);font-weight:400">(14 designs)</span></div>
+    <div class="tgrid" id="tgrid"></div>
+  </div>
+  <div class="navrow"><button class="btn bol" onclick="goTo(3)">← Back</button><button class="btn bp" onclick="goTo(5)">Preview Resume →</button></div>
+</div>
+
+<!-- ══ STEP 6: Preview & Export ══ -->
+<div class="sec" id="sec-5">
+  <div class="pvlyt">
+    <div>
+      <div class="card">
+        <div class="ctit">👁 Live Preview</div>
+        <div class="rwrap"><div class="rbox"><div id="PREVIEW"></div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ctit">📤 Export Resume</div>
+        <div class="expgrid">
+          <button class="btn bred" onclick="dlPDF()" style="padding:14px;font-size:.92rem">⬇️ PDF</button>
+          <button class="btn bpur" onclick="dlIMG('png')" style="padding:14px;font-size:.92rem">🖼️ PNG</button>
+          <button class="btn bgd" onclick="dlIMG('jpg')" style="padding:14px;font-size:.92rem">📸 JPG</button>
+          <button class="btn bol" onclick="doPrint()" style="padding:14px;font-size:.92rem">🖨️ Print</button>
+        </div>
+        <button class="btn bol" onclick="copyText()" style="width:100%;justify-content:center;margin-bottom:12px">📋 Copy Plain Text</button>
+        <div class="expinfo">
+          <p style="font-size:.81rem;color:#a09cff;font-weight:600;margin-bottom:6px">💡 Export Tips</p>
+          <p class="tip">• <b>PDF</b> — best for job applications. Photo is embedded.</p>
+          <p class="tip">• <b>PNG/JPG</b> — high-res image for portfolios &amp; sharing.</p>
+          <p class="tip">• <b>Print</b> — browser "Save as PDF" if PDF button fails.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ctit">🤖 AI Cover Letter</div>
+        <div class="aib">
+          <div class="aibt">✦ Tailored cover letter from your resume data</div>
+          <div class="fg">
+            <label>Job Description (optional)</label>
+            <textarea id="ai-jd" rows="4" placeholder="Paste the job posting here for a perfectly tailored letter…"></textarea>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn bai" onclick="genCL()">✦ Generate Cover Letter</button>
+            <div class="ldr" id="ld-cl"><div class="sp"></div> Writing…</div>
+          </div>
+          <div class="aio" id="out-cl" style="max-height:240px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navrow"><button class="btn bol" onclick="goTo(4)">← Change Template</button><div class="badge">🎉 Resume Ready!</div></div>
+</div>
+
+</div><!-- /app -->
+<script>
+// ── STATE ──────────────────────────────────────────
+const S={
+  photo:null,skills:[],exps:[],edus:[],schs:[],tpl:'T1',
+  tmpls:[
+    {id:'T1', name:'Classic Purple',    c:['#6c63ff','#e8e6ff','#888'], type:'classic'},
+    {id:'T2', name:'Modern Dark',       c:['#1a1a2e','#6c63ff','#666'], type:'sidebar'},
+    {id:'T3', name:'Minimal Clean',     c:['#111','#eee','#aaa'],       type:'minimal'},
+    {id:'T4', name:'Executive Gold',    c:['#2c2416','#d4a017','#888'], type:'banner'},
+    {id:'T5', name:'Teal Sidebar',      c:['#006d77','#83c5be','#555'], type:'sidebar'},
+    {id:'T6', name:'Forest Green',      c:['#1b4332','#52b788','#555'], type:'sidebar'},
+    {id:'T7', name:'Purple Creative',   c:['#4a0e8f','#d4a5f5','#888'], type:'banner'},
+    {id:'T8', name:'Corporate Navy',    c:['#1a3a6b','#c9a84c','#555'], type:'navy'},
+    {id:'T9', name:'Sunset Orange',     c:['#d62828','#fcbf49','#888'], type:'banner'},
+    {id:'T10',name:'Slate Blue',        c:['#2d3748','#63b3ed','#888'], type:'banner'},
+    {id:'T11',name:'Rose Elegant',      c:['#c2185b','#f8bbd0','#888'], type:'banner'},
+    {id:'T12',name:'Indigo Two-Col',    c:['#3730a3','#818cf8','#555'], type:'sidebar'},
+    {id:'T13',name:'Amber Pro',         c:['#78350f','#f59e0b','#888'], type:'navy'},
+    {id:'T14',name:'Monochrome Stark',  c:['#000','#333','#555'],       type:'classic'},
+  ]
+};
+const STEPS=['Personal','Experience','Education','Skills','Template','Preview'];
+
+// ── BOOT ──────────────────────────────────────────
+function boot(){
+  document.getElementById('hero').style.display='none';
+  document.getElementById('pbar').style.display='block';
+  document.getElementById('stabs').style.display='flex';
+  buildTabs();buildDots();buildTplGrid();addExp();addEdu();goTo(0);
+}
+function buildTabs(){
+  document.getElementById('stabs').innerHTML=STEPS.map((s,i)=>`<button class="tbtn" id="tb-${i}" onclick="goTo(${i})">${i+1}.${s}</button>`).join('');
+}
+function buildDots(){
+  document.getElementById('navDots').innerHTML=STEPS.map((_,i)=>`<div class="sdot" id="dot-${i}" onclick="goTo(${i})"></div>`).join('');
+}
+function goTo(n){
+  STEPS.forEach((_,i)=>{
+    document.getElementById(`sec-${i}`).classList.remove('active');
+    document.getElementById(`tb-${i}`).classList.remove('active');
+    const d=document.getElementById(`dot-${i}`);
+    d.classList.remove('active','done');if(i<n)d.classList.add('done');
+  });
+  document.getElementById(`sec-${n}`).classList.add('active');
+  document.getElementById(`tb-${n}`).classList.add('active');
+  document.getElementById(`dot-${n}`).classList.add('active');
+  document.getElementById('pfill').style.width=`${((n+1)/STEPS.length)*100}%`;
+  if(n===5)renderResume();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── PHOTO ──────────────────────────────────────────
+function handlePhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>5*1024*1024){toast('⚠️ Photo must be under 5MB');return;}
+  const r=new FileReader();
+  r.onload=ev=>{
+    S.photo=ev.target.result;
+    const img=document.getElementById('pprev');img.src=S.photo;img.style.display='block';
+    document.querySelector('.pzone .pico').style.display='none';
+    document.querySelector('.pzone .ptxt').style.display='none';
+    document.getElementById('rmbtn').style.display='flex';
+    toast('✓ Photo uploaded!');rip();
+  };r.readAsDataURL(f);
+}
+function removePhoto(){
+  S.photo=null;
+  const img=document.getElementById('pprev');img.src='';img.style.display='none';
+  document.querySelector('.pzone .pico').style.display='';
+  document.querySelector('.pzone .ptxt').style.display='';
+  document.getElementById('rmbtn').style.display='none';
+  document.getElementById('pinp').value='';rip();
+}
+function rip(){if(document.getElementById('sec-5').classList.contains('active'))renderResume();}
+
+// ── EXPERIENCE ──────────────────────────────────────
+function addExp(){S.exps.push({id:Date.now()});renderExps();}
+function delExp(id){S.exps=S.exps.filter(e=>e.id!==id);renderExps();}
+function renderExps(){
+  document.getElementById('exp-list').innerHTML=S.exps.map((e,i)=>`
+  <div class="ent"><div class="enthd"><span class="enum">POSITION ${i+1}</span>${i>0?`<button class="btn bdng bsm" onclick="delExp(${e.id})">× Remove</button>`:''}</div>
+  <div class="fg2">
+    <div class="fg"><label>Job Title *</label><input id="et-${e.id}" placeholder="Frontend Developer"></div>
+    <div class="fg"><label>Company *</label><input id="ec-${e.id}" placeholder="Google"></div>
+    <div class="fg"><label>Start Date</label><input id="es-${e.id}" placeholder="Jan 2022"></div>
+    <div class="fg"><label>End Date</label><input id="ee-${e.id}" placeholder="Present"></div>
+    <div class="fg fgf"><label>Description / Bullet Points</label><textarea id="ed-${e.id}" rows="4" placeholder="• Led development of web app used by 10k+ users&#10;• Reduced load time by 40%…"></textarea></div>
+  </div></div>`).join('');
+}
+
+// ── EDUCATION ──────────────────────────────────────
+function addEdu(){S.edus.push({id:Date.now()});renderEdus();}
+function delEdu(id){S.edus=S.edus.filter(e=>e.id!==id);renderEdus();}
+function renderEdus(){
+  document.getElementById('edu-list').innerHTML=S.edus.map((e,i)=>`
+  <div class="ent"><div class="enthd"><span class="enum">DEGREE ${i+1}</span>${i>0?`<button class="btn bdng bsm" onclick="delEdu(${e.id})">× Remove</button>`:''}</div>
+  <div class="fg2">
+    <div class="fg"><label>Degree / Program *</label><input id="edeg-${e.id}" placeholder="BS Information Technology"></div>
+    <div class="fg"><label>University / College *</label><input id="einst-${e.id}" placeholder="University of Gujrat"></div>
+    <div class="fg"><label>Start Year</label><input id="estart-${e.id}" placeholder="2021"></div>
+    <div class="fg"><label>End Year / Expected</label><input id="eend-${e.id}" placeholder="2025"></div>
+    <div class="fg"><label>CGPA / Grade</label><input id="egpa-${e.id}" placeholder="3.7 / 4.0"></div>
+    <div class="fg"><label>Major / Specialization</label><input id="emaj-${e.id}" placeholder="Web Development"></div>
+    <div class="fg fgf"><label>Achievements / Coursework</label><textarea id="eext-${e.id}" rows="2" placeholder="Dean's List 2x, Thesis: AI-based Resume Builder…"></textarea></div>
+  </div></div>`).join('');
+}
+
+// ── SCHOOL QUALIFICATION ──────────────────────────
+function addSch(){S.schs.push({id:Date.now()});renderSchs();}
+function delSch(id){S.schs=S.schs.filter(e=>e.id!==id);renderSchs();}
+function renderSchs(){
+  document.getElementById('sch-list').innerHTML=S.schs.map((e,i)=>`
+  <div class="ent"><div class="enthd"><span class="enum">QUALIFICATION ${i+1}</span>${i>0?`<button class="btn bdng bsm" onclick="delSch(${e.id})">× Remove</button>`:''}</div>
+  <div class="fg3">
+    <div class="fg"><label>Qualification Type *</label>
+      <select id="sqt-${e.id}">
+        <option>Matric (Grade 10)</option><option>FSc Pre-Engineering</option>
+        <option>FSc Pre-Medical</option><option>FA (Arts)</option>
+        <option>ICS (Computer Science)</option><option>O-Levels</option>
+        <option>A-Levels</option><option>Secondary School</option>
+        <option>High School Diploma</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fg"><label>School / Board *</label><input id="sschl-${e.id}" placeholder="Govt. High School / BISE Gujranwala"></div>
+    <div class="fg"><label>Passing Year</label><input id="syr-${e.id}" placeholder="2019"></div>
+    <div class="fg"><label>Marks / Grade / GPA</label><input id="smrk-${e.id}" placeholder="890/1100 · A Grade · 81%"></div>
+    <div class="fg"><label>City / Country</label><input id="scty-${e.id}" placeholder="Gujrat, Pakistan"></div>
+    <div class="fg fgf"><label>Subjects / Achievements</label><textarea id="ssub-${e.id}" rows="2" placeholder="Physics, Chemistry, Math — Position Holder, District Topper…"></textarea></div>
+  </div></div>`).join('');
+}
+
+// ── SKILLS ──────────────────────────────────────────
+function addSkill(n){const inp=document.getElementById('sk-inp');const v=(n||inp.value).trim();if(!v||S.skills.includes(v))return;S.skills.push(v);if(!n)inp.value='';renderSk();}
+function delSkill(s){S.skills=S.skills.filter(x=>x!==s);renderSk();}
+function renderSk(){document.getElementById('sk-list').innerHTML=S.skills.map(s=>`<div class="sktag">${s}<button onclick="delSkill('${s.replace(/'/g,"\\'")}')">×</button></div>`).join('');}
+
+// ── TEMPLATE GRID ──────────────────────────────────
+function buildTplGrid(){
+  document.getElementById('tgrid').innerHTML=S.tmpls.map(t=>`
+  <div class="tcard${t.id===S.tpl?' sel':''}" onclick="selTpl('${t.id}')">
+    <div class="tprev" style="background:${t.c[1]}25">
+      ${t.type==='sidebar'?`<div style="display:flex;height:100%;gap:3px">
+        <div style="width:38%;background:${t.c[0]}20;border-radius:3px;display:flex;flex-direction:column;gap:2px;padding:4px">
+          <div class="tl h" style="background:${t.c[0]};width:70%"></div>
+          <div class="tl s" style="background:${t.c[2]}"></div>
+          <div style="height:5px"></div>
+          <div class="tl s" style="background:${t.c[1]}"></div>
+          <div class="tl s" style="background:${t.c[1]}"></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px;padding:4px">
+          <div class="tl" style="background:${t.c[0]};width:70%;opacity:.6"></div>
+          <div class="tl s"></div><div class="tl s"></div>
+          <div style="height:4px"></div>
+          <div class="tl" style="background:${t.c[0]};width:60%;opacity:.5"></div>
+          <div class="tl s"></div>
+        </div>
+      </div>`:t.type==='banner'?`<div style="display:flex;flex-direction:column;height:100%;gap:2px">
+        <div style="background:${t.c[0]};border-radius:3px;padding:4px;margin-bottom:3px">
+          <div class="tl h" style="background:#fff;opacity:.9"></div>
+          <div class="tl s" style="background:${t.c[1]};opacity:.8"></div>
+        </div>
+        <div class="tl" style="background:${t.c[0]};width:40%;opacity:.5"></div>
+        <div class="tl s"></div><div class="tl s"></div>
+        <div class="tl" style="background:${t.c[0]};width:40%;opacity:.5"></div>
+        <div class="tl s"></div>
+      </div>`:`<div style="display:flex;flex-direction:column;gap:2px;padding:2px">
+        <div class="tl h" style="background:${t.c[0]}"></div>
+        <div class="tl s" style="background:${t.c[2]}"></div>
+        <div style="height:5px"></div>
+        <div class="tl" style="background:${t.c[0]};width:40%;opacity:.5"></div>
+        <div class="tl s"></div><div class="tl s"></div>
+        <div class="tl" style="background:${t.c[0]};width:40%;opacity:.5"></div>
+        <div class="tl s"></div><div class="tl s"></div>
+      </div>`}
+    </div>
+    <div class="tname">${t.id===S.tpl?'✓ ':''} ${t.name}</div>
+  </div>`).join('');
+}
+function selTpl(id){S.tpl=id;buildTplGrid();toast('Template: '+S.tmpls.find(t=>t.id===id).name);rip();}
+
+// ── DATA COLLECTOR ──────────────────────────────────
+const gv=id=>(document.getElementById(id)||{}).value||'';
+function getData(){
+  return{
+    name:gv('f-name')||'Your Name',title:gv('f-title'),email:gv('f-email'),
+    phone:gv('f-phone'),location:gv('f-location'),linkedin:gv('f-linkedin'),
+    github:gv('f-github'),website:gv('f-website'),summary:gv('f-summary'),
+    certs:gv('f-certs'),photo:S.photo,skills:[...S.skills],
+    exps:S.exps.map(e=>({title:gv(`et-${e.id}`),company:gv(`ec-${e.id}`),start:gv(`es-${e.id}`),end:gv(`ee-${e.id}`),desc:gv(`ed-${e.id}`)})).filter(e=>e.title||e.company),
+    edus:S.edus.map(e=>({degree:gv(`edeg-${e.id}`),institution:gv(`einst-${e.id}`),start:gv(`estart-${e.id}`),end:gv(`eend-${e.id}`),gpa:gv(`egpa-${e.id}`),major:gv(`emaj-${e.id}`),extra:gv(`eext-${e.id}`)})).filter(e=>e.degree||e.institution),
+    schs:S.schs.map(e=>({type:gv(`sqt-${e.id}`)||'School',school:gv(`sschl-${e.id}`),year:gv(`syr-${e.id}`),marks:gv(`smrk-${e.id}`),city:gv(`scty-${e.id}`),subjects:gv(`ssub-${e.id}`)})).filter(e=>e.school),
+  };
+}
+const cts=d=>[d.email,d.phone,d.location,d.linkedin,d.github,d.website].filter(Boolean);
+const bul=t=>(t||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<div style="margin-bottom:2px">${l}</div>`).join('');
+const ph=(src,cls,st='')=>src?`<img src="${src}" class="${cls}"${st?' style="'+st+'"':''} alt="">`: '';
+
+// ── SCHOOL SECTION HTML (shared by all templates) ──
+function schSec(d,cls='rsh'){
+  if(!d.schs.length)return '';
+  return `<div class="${cls}">School Qualification</div>
+  ${d.schs.map(s=>`<div class="ri">
+    <div class="rit">${s.type}${s.school?' — '+s.school:''}</div>
+    ${s.year||s.city?`<div class="ris">${s.year||''}${s.city?' · '+s.city:''}</div>`:''}
+    ${s.marks?`<div class="ris">Marks/Grade: ${s.marks}</div>`:''}
+    ${s.subjects?`<div class="rid">${s.subjects}</div>`:''}
+  </div>`).join('')}`;
+}
+
+// ── RESUME HTML BUILDERS ──────────────────────────
+function buildHTML(d,tid){
+  const t=S.tmpls.find(x=>x.id===tid)||S.tmpls[0];
+  if(t.type==='sidebar') return sidebarHTML(d,tid);
+  if(t.type==='banner')  return bannerHTML(d,tid);
+  if(t.type==='navy')    return navyHTML(d,tid);
+  if(tid==='T3')         return minimalHTML(d);
+  return classicHTML(d,tid);
+}
+
+// Classic (T1, T14)
+function classicHTML(d,C){
+  const eduH=d.edus.map(e=>`<div class="ri">
+    <div class="rit">${e.degree}${e.institution?' — '+e.institution:''}</div>
+    <div class="ris">${[e.start,e.end].filter(Boolean).join(' – ')}${e.gpa?' · GPA: '+e.gpa:''}${e.major?' · '+e.major:''}</div>
+    ${e.extra?`<div class="rid">${e.extra}</div>`:''}</div>`).join('');
+  return `<div class="${C}">
+  <div class="rh">${ph(d.photo,'rph')}<div class="rht">
+    <div class="rn">${d.name}</div>
+    ${d.title?`<div class="rr">${d.title}</div>`:''}
+    <div class="rco">${cts(d).map(x=>`<span>${x}</span>`).join('&nbsp;|&nbsp;')}</div>
+  </div></div><hr>
+  ${d.summary?`<div class="rs"><div class="rsh">Professional Summary</div><div class="rid">${d.summary}</div></div>`:''}
+  ${d.exps.length?`<div class="rs"><div class="rsh">Work Experience</div>${d.exps.map(e=>`<div class="ri">
+    <div class="rit">${e.title}${e.company?' — '+e.company:''}</div>
+    ${(e.start||e.end)?`<div class="ris">${[e.start,e.end].filter(Boolean).join(' – ')}</div>`:''}
+    <div class="rid">${bul(e.desc)}</div></div>`).join('')}</div>`:''}
+  ${d.edus.length?`<div class="rs"><div class="rsh">Education</div>${eduH}</div>`:''}
+  ${d.schs.length?`<div class="rs">${schSec(d,'rsh')}</div>`:''}
+  ${d.skills.length?`<div class="rs"><div class="rsh">Skills</div><div class="rsk">${d.skills.map(s=>`<span class="rskp">${s}</span>`).join('')}</div></div>`:''}
+  ${d.certs?`<div class="rs"><div class="rsh">Certifications</div><div class="rid">${bul(d.certs)}</div></div>`:''}
+  </div>`;}
+
+// Sidebar (T2, T5, T6, T12)
+function sidebarHTML(d,C){
+  const bars=d.skills.slice(0,10).map((s,i)=>`<div class="rbw"><div class="rbl">${s}</div><div class="rb"><div class="rbf" style="width:${62+((i*23)%36)}%"></div></div></div>`).join('');
+  const eduH=d.edus.map(e=>`<div class="ri"><div class="rit">${e.degree}</div><div class="ris">${e.institution||''}${(e.start||e.end)?' · '+[e.start,e.end].filter(Boolean).join(' – '):''}${e.gpa?' · GPA:'+e.gpa:''}</div>${e.extra?`<div class="rid">${e.extra}</div>`:''}</div>`).join('');
+  const schSide=d.schs.length?`<div class="rsl">School</div>${d.schs.map(s=>`<div class="rci">${s.type}${s.year?' ('+s.year+')':''}<br/>${s.marks||''}</div>`).join('')}`:'';
+  return `<div class="${C}">
+  <div class="rsb">
+    ${ph(d.photo,'rph')}
+    <div class="rn">${d.name}</div>${d.title?`<div class="rr">${d.title}</div>`:''}
+    <div class="rsl">Contact</div>${cts(d).map(x=>`<div class="rci">${x}</div>`).join('')}
+    ${d.skills.length?`<div class="rsl">Skills</div>${bars}`:''}
+    ${d.certs?`<div class="rsl">Certs</div><div style="font-size:.72em;color:#ccc;line-height:1.5">${d.certs}</div>`:''}
+    ${schSide}
+  </div>
+  <div class="rmn">
+    ${d.summary?`<div class="rsh">Summary</div><div class="rsu">${d.summary}</div>`:''}
+    ${d.exps.length?`<div class="rsh">Experience</div>${d.exps.map(e=>`<div class="ri"><div class="rit">${e.title}</div><div class="ris">${e.company||''}${(e.start||e.end)?' · '+[e.start,e.end].filter(Boolean).join(' – '):''}</div><div class="rid">${bul(e.desc)}</div></div>`).join('')}`:''}
+    ${d.edus.length?`<div class="rsh">Education</div>${eduH}`:''}
+  </div></div>`;}
+
+// Banner top (T4, T7, T9, T10, T11)
+function bannerHTML(d,C){
+  const phRad=C==='T7'?'border-radius:12px':C==='T10'?'border-radius:8px':'border-radius:50%';
+  const sumLabel=C==='T4'?'Executive Summary':'Professional Summary';
+  const eduH=d.edus.map(e=>`<div class="ri"><div class="rit">${e.degree}${e.institution?' — '+e.institution:''}</div><div class="ris">${[e.start,e.end].filter(Boolean).join(' – ')}${e.gpa?' · GPA: '+e.gpa:''}${e.major?' · '+e.major:''}</div>${e.extra?`<div class="rid">${e.extra}</div>`:''}</div>`).join('');
+  return `<div class="${C}">
+  <div class="rtop">${ph(d.photo,'rph',phRad+';width:76px;height:76px;object-fit:cover;flex-shrink:0')}
+  <div class="rhr"><div class="rn">${d.name}</div>${d.title?`<div class="rr">${d.title}</div>`:''}<div class="rco">${cts(d).map(x=>`<span>${x}</span>`).join('&nbsp;|&nbsp;')}</div></div></div>
+  <div class="rb">
+    ${d.summary?`<div class="rsh">${sumLabel}</div><div class="rid" style="font-size:.8em;line-height:1.6;color:#333;margin-bottom:9px">${d.summary}</div>`:''}
+    ${d.exps.length?`<div class="rsh">Work Experience</div>${d.exps.map(e=>`<div class="ri"><div class="rit">${e.title}${e.company?' — '+e.company:''}</div>${(e.start||e.end)?`<div class="ris">${[e.start,e.end].filter(Boolean).join(' – ')}</div>`:''}<div class="rid">${bul(e.desc)}</div></div>`).join('')}`:''}
+    ${d.edus.length?`<div class="rsh">Education</div>${eduH}`:''}
+    ${d.schs.length?schSec(d,'rsh'):''}
+    ${d.skills.length?`<div class="rsh">Skills</div><div class="rsk">${d.skills.map(s=>`<span class="rskp">${s}</span>`).join('')}</div>`:''}
+    ${d.certs?`<div class="rsh">Certifications</div><div class="rid" style="font-size:.8em;line-height:1.6;color:#333">${d.certs}</div>`:''}
+  </div></div>`;}
+
+// Navy-style (T8, T13)
+function navyHTML(d,C){
+  const eduH=d.edus.map(e=>`<div class="ri"><div class="rit">${e.degree}${e.institution?' — '+e.institution:''}</div><div class="ris">${[e.start,e.end].filter(Boolean).join(' – ')}${e.gpa?' · GPA: '+e.gpa:''}</div>${e.extra?`<div class="rid">${e.extra}</div>`:''}</div>`).join('');
+  return `<div class="${C}">
+  <div class="rh">${ph(d.photo,'rph')}
+  <div class="rht"><div class="rn">${d.name}</div>${d.title?`<div class="rr">${d.title}</div>`:''}<div class="rco">${cts(d).map(x=>`<span>${x}</span>`).join('&nbsp;|&nbsp;')}</div></div></div><hr>
+  ${d.summary?`<div class="rs"><div class="rsh">Professional Summary</div><div class="rid">${d.summary}</div></div>`:''}
+  ${d.exps.length?`<div class="rs"><div class="rsh">Work Experience</div>${d.exps.map(e=>`<div class="ri"><div class="rit">${e.title}${e.company?' — '+e.company:''}</div>${(e.start||e.end)?`<div class="ris">${[e.start,e.end].filter(Boolean).join(' – ')}</div>`:''}<div class="rid">${bul(e.desc)}</div></div>`).join('')}</div>`:''}
+  ${d.edus.length?`<div class="rs"><div class="rsh">Education</div>${eduH}</div>`:''}
+  ${d.schs.length?`<div class="rs">${schSec(d,'rsh')}</div>`:''}
+  ${d.skills.length?`<div class="rs"><div class="rsh">Skills</div><div class="rsk">${d.skills.map(s=>`<span class="rskp">${s}</span>`).join('')}</div></div>`:''}
+  ${d.certs?`<div class="rs"><div class="rsh">Certifications</div><div class="rid">${bul(d.certs)}</div></div>`:''}
+  </div>`;}
+
+// Minimal (T3)
+function minimalHTML(d){
+  const eduH=d.edus.map(e=>`<div class="ri"><div class="rir"><div class="rit">${e.degree}${e.institution?' — '+e.institution:''}</div><div class="rdt">${[e.start,e.end].filter(Boolean).join(' – ')}</div></div>${e.gpa?`<div class="ris">GPA: ${e.gpa}</div>`:''}<div class="rid">${e.extra||''}</div></div>`).join('');
+  const schH=d.schs.length?`<div class="rsh">School Qualification</div><div class="rdv"></div>${d.schs.map(s=>`<div class="ri"><div class="rir"><div class="rit">${s.type}${s.school?' — '+s.school:''}</div><div class="rdt">${s.year||''}</div></div>${s.marks?`<div class="ris">${s.marks}</div>`:''}</div>`).join('')}`:'';
+  return `<div class="T3">
+  <div class="rh"><div class="rhl"><div class="rn">${d.name}</div>${d.title?`<div class="rr">${d.title}</div>`:''}<div class="rco">${cts(d).join('  ·  ')}</div></div>${ph(d.photo,'rph')}</div>
+  <div class="rdv"></div>
+  ${d.summary?`<div class="rsh">Summary</div><div class="rdv"></div><div style="font-size:.79em;color:#555;line-height:1.6;margin-bottom:9px">${d.summary}</div>`:''}
+  ${d.exps.length?`<div class="rsh">Experience</div><div class="rdv"></div>${d.exps.map(e=>`<div class="ri"><div class="rir"><div class="rit">${e.title}${e.company?' — '+e.company:''}</div><div class="rdt">${[e.start,e.end].filter(Boolean).join(' – ')}</div></div><div class="rid">${bul(e.desc)}</div></div>`).join('')}`:''}
+  ${d.edus.length?`<div class="rsh">Education</div><div class="rdv"></div>${eduH}`:''}
+  ${schH}
+  ${d.skills.length?`<div class="rsh">Skills</div><div class="rdv"></div><div class="rsk">${d.skills.map(s=>`<span class="rskp">${s}</span>`).join('')}</div>`:''}
+  ${d.certs?`<div class="rsh" style="margin-top:12px">Certifications</div><div class="rdv"></div><div style="font-size:.79em;color:#555;line-height:1.6">${d.certs}</div>`:''}
+  </div>`;}
+
+// ── RENDER PREVIEW ──────────────────────────────────
+function renderResume(){document.getElementById('PREVIEW').innerHTML=buildHTML(getData(),S.tpl);}
+
+// ── PREPARE OFF-SCREEN RENDER ──────────────────────
+// KEY FIX: element must be visible (just off-screen), NOT hidden
+async function prepRender(d){
+  const el=document.getElementById('RENDER');
+  // Inject all page CSS so colors/fonts render correctly
+  let css='*{box-sizing:border-box;margin:0;padding:0}\n';
+  for(const sh of document.styleSheets){try{for(const rule of sh.cssRules)css+=rule.cssText+'\n';}catch(e){}}
+  el.innerHTML=`<style>${css}body,#RENDER{background:#fff!important;}</style>`+buildHTML(d,S.tpl);
+  // Wait for photo img to decode
+  await Promise.all([...el.querySelectorAll('img')].map(img=>img.complete?Promise.resolve():new Promise(res=>{img.onload=res;img.onerror=res;})));
+  await new Promise(r=>setTimeout(r,250));
+  return el;
+}
+
+// ── PDF DOWNLOAD ──────────────────────────────────
+async function dlPDF(){
+  const d=getData();
+  const fname=(d.name.replace(/[^a-z0-9]/gi,'_')||'Resume')+'_Resume.pdf';
+  showOv('📄','Preparing PDF…','Rendering resume content…');
+  try{
+    const el=await prepRender(d);
+    setP(30);setSub('Capturing with html2canvas…');
+    const canvas=await html2canvas(el,{
+      scale:2,useCORS:true,allowTaint:true,
+      logging:false,backgroundColor:'#ffffff',
+      width:794,windowWidth:794,
+      x:0,y:0,scrollX:0,scrollY:0
+    });
+    setP(70);setSub('Building PDF with jsPDF…');
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    const W=pdf.internal.pageSize.getWidth();   // 210mm
+    const H=pdf.internal.pageSize.getHeight();  // 297mm
+    const imgData=canvas.toDataURL('image/jpeg',0.97);
+    const imgH=(canvas.height/canvas.width)*W;
+    if(imgH<=H){
+      pdf.addImage(imgData,'JPEG',0,0,W,imgH);
+    }else{
+      // Multi-page: slice canvas
+      const pxPerPage=Math.floor(canvas.width*(H/W));
+      let yPx=0,pg=0;
+      while(yPx<canvas.height){
+        const tmpC=document.createElement('canvas');
+        tmpC.width=canvas.width;
+        tmpC.height=Math.min(pxPerPage,canvas.height-yPx);
+        tmpC.getContext('2d').drawImage(canvas,0,yPx,canvas.width,tmpC.height,0,0,canvas.width,tmpC.height);
+        const sliceH=(tmpC.height/canvas.width)*W;
+        if(pg>0)pdf.addPage();
+        pdf.addImage(tmpC.toDataURL('image/jpeg',0.97),'JPEG',0,0,W,sliceH);
+        yPx+=pxPerPage;pg++;
+      }
+    }
+    setP(95);pdf.save(fname);setP(100);setSub('Done! ✓');
+    await new Promise(r=>setTimeout(r,600));
+    toast('✓ PDF downloaded!');
+  }catch(err){console.error(err);toast('⚠️ PDF error — try Print button');}
+  hideOv();document.getElementById('RENDER').innerHTML='';
+}
+
+// ── IMAGE DOWNLOAD (PNG / JPG) ──────────────────
+async function dlIMG(fmt){
+  const d=getData();
+  const fname=(d.name.replace(/[^a-z0-9]/gi,'_')||'Resume')+'_Resume.'+fmt;
+  showOv('🖼️','Generating '+fmt.toUpperCase()+'…','Capturing resume at high resolution…');
+  try{
+    const el=await prepRender(d);
+    setP(40);
+    const canvas=await html2canvas(el,{
+      scale:3,useCORS:true,allowTaint:true,
+      logging:false,backgroundColor:'#ffffff',
+      width:794,windowWidth:794,x:0,y:0,scrollX:0,scrollY:0
+    });
+    setP(85);setSub('Saving image…');
+    const mime=fmt==='jpg'?'image/jpeg':'image/png';
+    const q=fmt==='jpg'?0.95:1.0;
+    const a=document.createElement('a');a.download=fname;a.href=canvas.toDataURL(mime,q);a.click();
+    setP(100);setSub('Done! ✓');
+    await new Promise(r=>setTimeout(r,600));
+    toast('✓ '+fmt.toUpperCase()+' downloaded!');
+  }catch(err){console.error(err);toast('⚠️ Image export error');}
+  hideOv();document.getElementById('RENDER').innerHTML='';
+}
+
+// ── PRINT ──────────────────────────────────────────
+function doPrint(){
+  const d=getData();
+  let css='*{box-sizing:border-box;margin:0;padding:0}\n';
+  for(const sh of document.styleSheets){try{for(const rule of sh.cssRules)css+=rule.cssText+'\n';}catch(e){}}
+  const win=window.open('','_blank','width=860,height=1100');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Resume — ${d.name}</title>
+  <style>${css}body{background:#fff}@page{margin:8mm;size:A4}@media print{body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}</style>
+  </head><body>${buildHTML(d,S.tpl)}</body></html>`);
+  win.document.close();setTimeout(()=>{win.focus();win.print();},900);
+}
+
+// ── COPY TEXT ──────────────────────────────────────
+function copyText(){
+  const d=getData();
+  const schT=d.schs.length?'SCHOOL QUALIFICATION\n'+d.schs.map(s=>`${s.type} — ${s.school} (${s.year}) ${s.marks?'| '+s.marks:''}`).join('\n'):'';
+  const txt=[d.name,d.title,cts(d).join(' | '),'',
+    d.summary?'SUMMARY\n'+d.summary:'',
+    d.exps.length?'EXPERIENCE\n'+d.exps.map(e=>`${e.title} at ${e.company} (${[e.start,e.end].filter(Boolean).join('–')})\n${e.desc}`).join('\n\n'):'',
+    d.edus.length?'EDUCATION\n'+d.edus.map(e=>`${e.degree} — ${e.institution}${e.gpa?' GPA:'+e.gpa:''}`).join('\n'):'',
+    schT,
+    d.skills.length?'SKILLS\n'+d.skills.join(', '):'',
+    d.certs?'CERTIFICATIONS\n'+d.certs:''
+  ].filter(Boolean).join('\n\n');
+  navigator.clipboard.writeText(txt).then(()=>toast('📋 Copied to clipboard!'));
+}
+
+// ── PDF OVERLAY HELPERS ──────────────────────────
+function showOv(ico,title,sub){
+  document.getElementById('pdfico').textContent=ico;
+  document.getElementById('pdfot').textContent=title;
+  document.getElementById('pdfos').textContent=sub;
+  document.getElementById('pdfpf').style.width='0%';
+  document.getElementById('pdfo').classList.add('on');
+}
+function hideOv(){document.getElementById('pdfo').classList.remove('on');}
+function setP(p){document.getElementById('pdfpf').style.width=p+'%';}
+function setSub(s){document.getElementById('pdfos').textContent=s;}
+
+// ── AI CALLS ──────────────────────────────────────
+async function ai(prompt,sys=''){
+  const body={model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]};
+  if(sys)body.system=sys;
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await r.json();
+  if(data.error)throw new Error(data.error.message);
+  return data.content?.[0]?.text||'No response.';
+}
+async function genSum(){
+  const name=gv('f-name')||'a professional',role=gv('f-title')||'professional',yrs=gv('ai-yrs')||'2',skh=gv('ai-skh')||'',tone=gv('ai-tone');
+  ld('ld-sum',1);clr('out-sum');
+  try{const r=await ai(`Write a ${tone} resume summary for ${name}, a ${role} with ${yrs} year(s) experience. Skills: ${skh||'varied'}. 3-4 sentences, ATS-friendly.`,'Expert resume writer. Return ONLY the summary paragraph. No preamble.');show('out-sum',r);document.getElementById('f-summary').value=r.trim();}catch(e){show('out-sum','⚠️ '+e.message);}
+  ld('ld-sum',0);
+}
+async function genBullets(){
+  const title=gv('ai-bpt'),company=gv('ai-bpc'),resp=gv('ai-bpr');
+  if(!title){toast('Enter a job title first!');return;}
+  ld('ld-bul',1);clr('out-bul');
+  try{const r=await ai(`Generate 4 strong resume bullet points for ${title}${company?' at '+company:''}. Context: ${resp||'general role'}. Action verbs, quantify, ATS-friendly.`,'Expert resume writer. Output ONLY 4 bullet points starting with •. Nothing else.');show('out-bul',r);}catch(e){show('out-bul','⚠️ '+e.message);}
+  ld('ld-bul',0);
+}
+async function suggestSkills(){
+  const role=gv('ai-skr');if(!role){toast('Enter your role first!');return;}
+  ld('ld-sk',1);document.getElementById('sugg-sk').innerHTML='';
+  try{const r=await ai(`List the top 14 skills for a ${role}. Return ONLY a JSON array of strings.`,'Return only valid JSON array. Nothing else.');
+  const arr=JSON.parse(r.replace(/```json|```/g,'').trim());
+  document.getElementById('sugg-sk').innerHTML=arr.map(s=>`<button class="btn bol bsm" onclick="pickSk('${s.replace(/'/g,"\\'")}',this)" style="border-radius:100px">${s}</button>`).join('');}catch{toast('Suggestion failed — try again.');}
+  ld('ld-sk',0);
+}
+function pickSk(n,btn){addSkill(n);btn.style.cssText+='background:rgba(108,99,255,.2);border-color:var(--ac);color:var(--ac)';btn.disabled=true;}
+async function genCL(){
+  const jd=gv('ai-jd'),d=getData();
+  if(d.name==='Your Name'){toast('Fill Personal Info first!');return;}
+  ld('ld-cl',1);clr('out-cl');
+  const expStr=d.exps.slice(0,2).map(e=>`${e.title} at ${e.company}`).join(', ');
+  const prompt=jd?`Cover letter for ${d.name}, a ${d.title||'professional'} (exp: ${expStr||'various'}). Skills: ${d.skills.slice(0,6).join(', ')}. Tailored to job: "${jd.slice(0,500)}". 3 paragraphs.`:`General cover letter for ${d.name}, a ${d.title||'professional'}. Skills: ${d.skills.slice(0,6).join(', ')}. 3 paragraphs.`;
+  try{const r=await ai(prompt,'Expert career coach. Start "Dear Hiring Manager,". No placeholders. Formal but warm.');show('out-cl',r);}catch(e){show('out-cl','⚠️ '+e.message);}
+  ld('ld-cl',0);
+}
+
+// ── UI HELPERS ────────────────────────────────────
+function ld(id,on){document.getElementById(id).classList.toggle('on',!!on);}
+function show(id,txt){const el=document.getElementById(id);el.textContent=txt;el.classList.add('on');}
+function clr(id){const el=document.getElementById(id);el.textContent='';el.classList.remove('on');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3400);}
+</script>
+</body>
+</html>
